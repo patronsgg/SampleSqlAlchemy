@@ -1,26 +1,24 @@
 from data import db_session
-from data.news import News
+from data.jobs import Jobs
 from data.users import User
 
-db_session.global_init('sempai.sqlite')
+db_session.global_init('🅰️🅱️🅾️🅱️🅰️.sqlite')
 session = db_session.create_session()
 
-u_1 = User()
-u_1.name = "Тобишев"
-u_1.about = "Десять дней без аниме"
-u_1.email = "to@bish.ru"
-session.add(u_1)
+list_persons = [('Адам', 'Бущкар', 14), ('Костя', 'Тодыщев', 88),
+                ('Дачеслав', 'Жмулов', 19)]
 
-u_2 = User()
-u_2.name = "Slave"
-u_2.about = "White Slave"
-u_2.email = "slave@white.ru"
-session.add(u_2)
+list_jobs = [(1, 'Создание новичкама', 228, '1, 2', False),
+             (2, 'razrabotka kolca nuitona', 2, '1', False),
+             (3, 'Телепорт из Нахабино', 1488, '0, 1', False)]
+
+for x in list_persons:
+    user = User(name=x[0], surname=x[1], age=x[2])
+    session.add(user)
+
+for x in list_jobs:
+    job = Jobs(team_leader_id=x[0], job=x[1], work_size=x[2], collaborations=x[3],
+               is_finished=x[4])
+    session.add(job)
 
 session.commit()
-
-user = session.query(User).first()
-print(user.name)
-
-a_user = session.query(User).filter(User.id > 1,
-                                    User.email.notlike("%a%"))

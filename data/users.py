@@ -1,5 +1,4 @@
 import sqlalchemy as sa
-from sqlalchemy import orm
 from datetime import datetime
 from werkzeug.security import generate_password_hash, \
     check_password_hash
@@ -11,15 +10,17 @@ class User(SqlAlchemyBase):
 
     id = sa.Column(sa.Integer, primary_key=True,
                    autoincrement=True)
+    surname = sa.Column(sa.String, nullable=True)
     name = sa.Column(sa.String, nullable=True)
-    about = sa.Column(sa.String, nullable=True)
+    age = sa.Column(sa.Integer, nullable=True)
+    position = sa.Column(sa.String, nullable=True)
+    speciality = sa.Column(sa.String, nullable=True)
+    address = sa.Column(sa.String, nullable=True)
     email = sa.Column(sa.String, unique=True,
                       nullable=True)
-    created_date = sa.Column(sa.DateTime,
-                             default=datetime.now)
-    hashed_password = sa.Column(sa.String, nullable=True)
-
-    news = orm.relation('News', back_populates='user')
+    hashed_password = sa.Column(sa.String,
+                                nullable=True)
+    modified_date = sa.Column(sa.DateTime)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
