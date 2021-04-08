@@ -6,8 +6,20 @@
           integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 </head>
 <body>
-    <h1>Миссия Колонизация Марса</h1>
-    <h4 class="alert alert-light">И на Марсе будут яблони цвести!</h4>
+<header>
+    <nav class="navbar navbar-light bg-light">
+        <h1>Миссия Колонизация Марса</h1>
+        {% if current_user.is_authenticated %}
+            <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+        {% else %}
+            <p>
+                <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
+                <a class="btn btn-success" href="/login">Войти</a>
+            </p>
+        {% endif %}
+    </nav>
+</header>
+<h4 class="alert alert-light">И на Марсе будут яблони цвести!</h4>
     {% block content %}{% endblock %}
 </body>
 </html>
