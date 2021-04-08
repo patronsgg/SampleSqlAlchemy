@@ -1,11 +1,11 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, abort, request
 from data import db_session
 from data.jobs import Jobs
 from data.users import User
 from forms.user import RegisterForm
 from forms.login_form import LoginForm
-from forms.job_add import JobAddingForm
-from flask_login import login_user, LoginManager, logout_user, login_required
+from forms.job_add import JobForm
+from flask_login import login_user, LoginManager, logout_user, login_required, current_user
 
 app = Flask(__name__)
 
@@ -82,7 +82,7 @@ def logout():
 @app.route('/addjob', methods=['GET', 'POST'])
 @login_required
 def add_job():
-    form = JobAddingForm()
+    form = JobForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         job = Jobs(
@@ -95,7 +95,61 @@ def add_job():
         db_sess.add(job)
         db_sess.commit()
         return redirect('/')
-    return render_template('adding_job.html',  form=form)
+    return render_template('job.html', title='Adding job', form=form)
+
+
+@app.route('/editjob/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(id):
+    form = JobForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        job = db_sess.query(Jobs).filter(Jobs.id == id,
+                                         ((Jobs.team_leader_id == current_user.id) | (current_user.id == 1))
+                                         ).first()
+
+        if job:
+            form.job_title.data = job.job
+            form.work_size.data = job.work_size
+            form.team_leader.data = job.team_leader_id
+            form.is_finished.data = (True if job.is_finished else False)
+            form.collaborators.data = job.collaborations
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        job = db_sess.query(Jobs).filter(Jobs.id == id,
+                                         ((Jobs.team_leader_id == current_user.id) | (current_user.id == 1))
+                                         ).first()
+        if job:
+            job.job = form.job_title.data
+            job.work_size = form.work_size.data
+            job.team_leader_id = form.team_leader.data
+            job.is_finished = form.is_finished.data
+            job.collaborations = form.collaborators.data
+            db_sess.commit()
+            return redirect('/')
+        else:
+            abort(404)
+    return render_template('job.html',
+                           title='Edit job',
+                           form=form
+                           )
+
+
+@app.route('/deletejob/<int:id>', methods=['GET', 'POST'])
+@login_required
+def news_delete(id):
+    db_sess = db_session.create_session()
+    job = db_sess.query(Jobs).filter(Jobs.id == id,
+                                     ((Jobs.team_leader_id == current_user.id) | (current_user.id == 1))
+                                     ).first()
+    if job:
+        db_sess.delete(job)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/')
 
 
 if __name__ == '__main__':
